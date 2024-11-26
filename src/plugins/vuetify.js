@@ -11,6 +11,7 @@ import 'vuetify/styles'
 // Composables
 import { createVuetify } from 'vuetify'
 import { VCalendar } from 'vuetify/labs/VCalendar'
+import { VDateInput } from 'vuetify/labs/VDateInput'
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
@@ -19,5 +20,6 @@ export default createVuetify({
   },
   components: {
     VCalendar,
+    VDateInput,
   },
 })
