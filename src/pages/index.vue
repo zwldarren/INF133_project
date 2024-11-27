@@ -8,7 +8,16 @@
   </v-sheet>
 
   <v-sheet>
-    <v-calendar ref="calendar" v-model="value" :events="events" :view-mode="type" :weekdays="weekday"></v-calendar>
+    <v-calendar ref="calendar" v-model="value" :events="events" :view-mode="type" :weekdays="weekday">
+      <template #event="{ event }">
+        <div class="d-flex align-center" :style="{ color: event.color, fontSize: '16px' }">
+          <span>{{ event.title }} ({{ formatDate(event.start) }} - {{ formatDate(event.end) }})</span>
+          <v-btn icon x-small @click="deleteEvent(event)">
+            <v-icon :style="{ color: event.color, fontSize: '12px' }">mdi-delete</v-icon>
+          </v-btn>
+        </div>
+      </template>
+    </v-calendar>
   </v-sheet>
 
   <v-dialog v-model="dialog" max-width="500px">
@@ -24,6 +33,9 @@
           <v-row>
             <v-col>
               <v-date-input prepend-icon="" label="Date" v-model="newEvent.start"></v-date-input>
+            </v-col>
+            <v-col>
+              <v-date-input prepend-icon="" label="End Date" v-model="newEvent.end"></v-date-input>
             </v-col>
           </v-row>
           <v-row>
@@ -41,6 +53,8 @@
     </v-card>
   </v-dialog>
 </template>
+
+
 <script setup>
 import { ref } from 'vue';
 
@@ -53,6 +67,11 @@ const weekdays = [
   { title: 'Mon - Fri', value: [1, 2, 3, 4, 5] },
 ];
 
+const formatDate = (date) => {
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(date).toLocaleDateString(undefined, options);
+};
+
 const value = ref([]);
 const events = ref([]);
 const colors = ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'];
@@ -60,19 +79,37 @@ const colors = ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'gre
 const dialog = ref(false);
 const newEvent = ref({
   title: '',
-  start: new Date(),
-  end: new Date(),
+  start: null,
+  end: null,
   color: '',
 });
 
+// Save events to localStorage
+const saveEventsToLocalStorage = () => {
+  localStorage.setItem("calendarEvents", JSON.stringify(events.value));
+};
+
+// Load events from localStorage
+const loadEventsFromLocalStorage = () => {
+  const storedEvents = localStorage.getItem("calendarEvents");
+  if (storedEvents) {
+    events.value = JSON.parse(storedEvents).map((event) => ({
+      ...event,
+      start: new Date(event.start), // Parse date strings
+      end: new Date(event.end),
+    }));
+  }
+};
+
 const saveEvent = () => {
-  if (!newEvent.value.title || !newEvent.value.color) {
+  if (!newEvent.value.title || !newEvent.value.color || !newEvent.value.start || !newEvent.value.end) {
     alert('Please fill out all fields');
     return;
   }
 
-  if (!newEvent.value.end || newEvent.value.start === newEvent.value.end) {
-    newEvent.value.end = new Date(newEvent.value.start.getTime() + 60 * 60 * 1000); // 1 hour
+  if (newEvent.value.start > newEvent.value.end) {
+    alert('End date must be after the start date');
+    return;
   }
 
   events.value.push({
@@ -82,13 +119,27 @@ const saveEvent = () => {
     color: newEvent.value.color,
   });
 
+  saveEventsToLocalStorage(); // Save events to localStorage
+
   // Reset form
   newEvent.value = {
     title: '',
-    start: new Date(),
-    end: new Date(),
+    start: null,
+    end: null,
     color: '',
   };
   dialog.value = false;
 };
+
+// Delete an event
+const deleteEvent = (eventToDelete) => {
+  events.value = events.value.filter((event) => event !== eventToDelete);
+  saveEventsToLocalStorage(); // Update localStorage
+};
+
+// Load events when the component is mounted
+onMounted(() => {
+  loadEventsFromLocalStorage();
+});
+
 </script>
