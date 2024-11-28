@@ -8,7 +8,7 @@
   </v-sheet>
 
   <v-sheet>
-    <v-calendar ref="calendar" v-model="value" :events="events" :view-mode="type" :weekdays="weekday">
+    <v-calendar ref="calendar" v-model="value" :events="eventsStore.events" :view-mode="type" :weekdays="weekday">
       <template #event="{ event }">
         <div class="d-flex align-center" :style="{ color: event.color, fontSize: '16px' }">
           <span>{{ event.title }} ({{ formatDate(event.start) }} - {{ formatDate(event.end) }})</span>
@@ -54,9 +54,9 @@
   </v-dialog>
 </template>
 
-
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useEventsStore } from '@/stores/events';
 
 const type = ref('month');
 const types = ['month', 'week', 'day'];
@@ -73,9 +73,9 @@ const formatDate = (date) => {
 };
 
 const value = ref([]);
-const events = ref([]);
 const colors = ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'];
 
+const eventsStore = useEventsStore();
 const dialog = ref(false);
 const newEvent = ref({
   title: '',
@@ -83,23 +83,6 @@ const newEvent = ref({
   end: null,
   color: '',
 });
-
-// Save events to localStorage
-const saveEventsToLocalStorage = () => {
-  localStorage.setItem("calendarEvents", JSON.stringify(events.value));
-};
-
-// Load events from localStorage
-const loadEventsFromLocalStorage = () => {
-  const storedEvents = localStorage.getItem("calendarEvents");
-  if (storedEvents) {
-    events.value = JSON.parse(storedEvents).map((event) => ({
-      ...event,
-      start: new Date(event.start), // Parse date strings
-      end: new Date(event.end),
-    }));
-  }
-};
 
 const saveEvent = () => {
   if (!newEvent.value.title || !newEvent.value.color || !newEvent.value.start || !newEvent.value.end) {
@@ -112,14 +95,12 @@ const saveEvent = () => {
     return;
   }
 
-  events.value.push({
+  eventsStore.addEvent({
     title: newEvent.value.title,
     start: newEvent.value.start,
     end: newEvent.value.end,
     color: newEvent.value.color,
   });
-
-  saveEventsToLocalStorage(); // Save events to localStorage
 
   // Reset form
   newEvent.value = {
@@ -133,13 +114,11 @@ const saveEvent = () => {
 
 // Delete an event
 const deleteEvent = (eventToDelete) => {
-  events.value = events.value.filter((event) => event !== eventToDelete);
-  saveEventsToLocalStorage(); // Update localStorage
+  eventsStore.deleteEvent(eventToDelete);
 };
 
 // Load events when the component is mounted
 onMounted(() => {
-  loadEventsFromLocalStorage();
+  eventsStore.loadFromLocalStorage();
 });
-
 </script>

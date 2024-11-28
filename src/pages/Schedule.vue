@@ -4,19 +4,27 @@
         <v-card>
             <v-list-item v-for="(item, index) in scheduleItems" :key="index">
                 <v-list-item-title>{{ item.title }}</v-list-item-title>
-                <v-list-item-subtitle>{{ item.date }}</v-list-item-subtitle>
+                <v-list-item-subtitle>{{ formatDate(item.date) }}</v-list-item-subtitle>
             </v-list-item>
         </v-card>
     </v-layout>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
+import { useEventsStore } from '@/stores/events';
 
-const scheduleItems = ref([
-    { title: 'Meeting', date: '2024-11-22' },
-    { title: 'Project Deadline', date: '2024-11-24' },
-]);
+const eventsStore = useEventsStore();
+
+const scheduleItems = computed(() => {
+    return eventsStore.events.map(event => ({
+        title: event.title,
+        date: event.start,
+    }));
+});
+
+const formatDate = (date) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(date).toLocaleDateString(undefined, options);
+};
 </script>
-
-<style scoped></style>
