@@ -13,8 +13,15 @@ export const useEventsStore = defineStore('events', {
             this.events.push(event);
             this.saveToLocalStorage();
         },
+        updateEvent(updatedEvent) {
+            const index = this.events.findIndex(event => event.id === updatedEvent.id);
+            if (index !== -1) {
+                this.events.splice(index, 1, updatedEvent);
+                this.saveToLocalStorage();
+            }
+        },
         deleteEvent(eventToDelete) {
-            this.events = this.events.filter(event => event !== eventToDelete);
+            this.events = this.events.filter(event => event.id !== eventToDelete.id);
             this.saveToLocalStorage();
         },
 
