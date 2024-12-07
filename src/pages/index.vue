@@ -10,7 +10,8 @@
   <v-sheet>
     <v-calendar ref="calendar" v-model="value" :events="eventsStore.events" :view-mode="type" :weekdays="weekday">
       <template #event="{ event }">
-        <v-sheet @click="openEventDialog(event)" :color="event.color" class="event-block white--text" elevation="1" width="100%">
+        <v-sheet @click="openEventDialog(event)" :color="event.color" class="event-block white--text" elevation="1"
+          width="100%">
           {{ event.title }}
         </v-sheet>
       </template>
@@ -52,12 +53,31 @@
           </v-row>
           <v-row>
             <v-col>
-              <v-date-input prepend-icon="" label="Start Time" v-model="newEvent.start" type="datetime">
-              </v-date-input>
+              <v-date-input prepend-icon="" label="Start Date" v-model="newEvent.startDate"
+                type="datetime"></v-date-input>
             </v-col>
             <v-col>
-              <v-date-input prepend-icon="" label="End Time" v-model="newEvent.end" type="datetime">
-              </v-date-input>
+              <v-text-field v-model="newEvent.startTime" :active="startMenu" :focus="startMenu"
+                prepend-icon="mdi-clock-time-four-outline">
+                <v-menu v-model="startMenu" activator="parent" :close-on-content-click="false"
+                  transition="scale-transition">
+                  <v-time-picker v-model="newEvent.startTime" format="24hr" scrollable></v-time-picker>
+                </v-menu>
+              </v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col>
+              <v-date-input prepend-icon="" label="End Date" v-model="newEvent.endDate" type="datetime"></v-date-input>
+            </v-col>
+            <v-col>
+              <v-text-field v-model="newEvent.endTime" :active="endMenu" :focus="endMenu"
+                prepend-icon="mdi-clock-time-four-outline">
+                <v-menu v-model="endMenu" activator="parent" :close-on-content-click="false"
+                  transition="scale-transition">
+                  <v-time-picker v-model="newEvent.endTime" format="24hr" scrollable></v-time-picker>
+                </v-menu>
+              </v-text-field>
             </v-col>
           </v-row>
           <v-row>
@@ -99,6 +119,8 @@ const formatDate = (date) => {
 
 const value = ref([]);
 const colors = ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'];
+const startMenu = ref(false);
+const endMenu = ref(false);
 
 const eventsStore = useEventsStore();
 const dialog = ref(false);
@@ -109,8 +131,10 @@ const newEvent = ref({
   id: null,
   title: '',
   description: '',
-  start: null,
-  end: null,
+  startDate: null,
+  endDate: null,
+  startTime: '00:00',
+  endTime: '00:00',
   color: '',
 });
 
@@ -134,8 +158,10 @@ const resetNewEventForm = () => {
     id: null,
     title: '',
     description: '',
-    start: null,
-    end: null,
+    startDate: null,
+    endDate: null,
+    startTime: '00:00',
+    endTime: '00:00',
     color: '',
   };
   dialog.value = false;
@@ -143,40 +169,63 @@ const resetNewEventForm = () => {
 };
 
 const saveEvent = () => {
-  if (!newEvent.value.title || !newEvent.value.color || !newEvent.value.start || !newEvent.value.end) {
+  if (!newEvent.value.title || !newEvent.value.color || !newEvent.value.startDate || !newEvent.value.endDate) {
     alert('Please fill out all fields');
     return;
   }
 
-  if (newEvent.value.start > newEvent.value.end) {
+  const startDate = newEvent.value.startDate;
+  const [startH, startM] = newEvent.value.startTime.split(':');
+  startDate.setHours(parseInt(startH, 10));
+  startDate.setMinutes(parseInt(startM, 10));
+
+  const endDate = newEvent.value.endDate;
+  const [endH, endM] = newEvent.value.endTime.split(':');
+  endDate.setHours(parseInt(endH, 10));
+  endDate.setMinutes(parseInt(endM, 10))
+
+  if (startDate > endDate) {
     alert('End date must be after the start date');
     return;
   }
 
+  const eventData = {
+    ...newEvent.value,
+    start: startDate,
+    end: endDate
+  };
+
   if (isEditMode.value) {
-    eventsStore.updateEvent({ ...newEvent.value });
+    eventsStore.updateEvent(eventData);
   } else {
     // Generate a unique ID
-    newEvent.value.id = uuidv4();
-    eventsStore.addEvent({ ...newEvent.value });
+    eventData.id = uuidv4();
+    eventsStore.addEvent(eventData);
   }
 
-
   // Reset form
-  newEvent.value = {
-    title: '',
-    description: '',
-    start: null,
-    end: null,
-    color: '',
-  };
-  dialog.value = false;
-  isEditMode.value = false;
+  resetNewEventForm();
 };
 
 const editEvent = (event) => {
   isEditMode.value = true;
-  newEvent.value = { ...event };
+
+  const sDate = new Date(event.start);
+  const eDate = new Date(event.end);
+
+  const pad = (num) => (num < 10 ? '0' + num : num);
+
+  newEvent.value = {
+    id: event.id,
+    title: event.title,
+    description: event.description || '',
+    startDate: sDate,
+    endDate: eDate,
+    startTime: pad(sDate.getHours()) + ':' + pad(sDate.getMinutes()),
+    endTime: pad(eDate.getHours()) + ':' + pad(eDate.getMinutes()),
+    color: event.color,
+  };
+
   dialog.value = true;
   eventDialog.value = false;
 };
