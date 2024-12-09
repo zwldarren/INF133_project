@@ -15,20 +15,11 @@ const openai = new OpenAI({
 // define event schema
 const eventSchema = z.object({
     title: z.string(),
-    startDate: z.string(),
-    endDate: z.string(),
-    startTime: z.string(),
-    endTime: z.string(),
+    start: z.string(),
+    end: z.string(),
     description: z.string().optional(),
     color: z.string()
 });
-
-function formatYMD(dateObj) {
-    const y = dateObj.getFullYear();
-    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const d = String(dateObj.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-}
 
 app.post('/api/parse-event', async (req, res) => {
     const { messages } = req.body
@@ -49,20 +40,12 @@ app.post('/api/parse-event', async (req, res) => {
 
         console.log('Parsed event:', structuredEvent)
 
-        const startDateObj = new Date(structuredEvent.date);
-        const endDateObj = new Date(structuredEvent.date);
-
-        const startDateStr = formatYMD(startDateObj);
-        const endDateStr = formatYMD(endDateObj);
-
         const eventData = {
             id: uuidv4(),
             title: structuredEvent.title,
             description: structuredEvent.description || '',
-            startDate: startDateStr,
-            endDate: endDateStr,
-            startTime: structuredEvent.startTime,
-            endTime: structuredEvent.endTime,
+            start: new Date(structuredEvent.start),
+            end: new Date(structuredEvent.end),
             color: structuredEvent.color || 'blue'
         }
 
