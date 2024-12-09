@@ -18,7 +18,7 @@
 
     <v-row>
       <v-col cols="12">
-        <v-calendar ref="calendar" v-model="value" :events="eventsStore.events" :view-mode="type" :weekdays="weekday">
+        <v-calendar ref="calendar" v-model="value" :events="events" :view-mode="type" :weekdays="weekday">
           <template #event="{ event }">
             <v-sheet @click="openEventDialog(event)" :color="event.color" class="event-block white--text" elevation="1"
               width="100%">
@@ -121,7 +121,16 @@ import { ref, onMounted } from 'vue';
 import { useEventsStore } from '@/stores/events';
 import { v4 as uuidv4 } from 'uuid';
 
-// Existing script setup remains unchanged
+const events = computed(() => {
+    return eventsStore.events.map(event => {
+        return {
+            ...event,
+            start: new Date(event.start),
+            end: new Date(event.end),
+        };
+    });
+});
+
 const type = ref('month');
 const types = ['month', 'week', 'day'];
 const weekday = ref([0, 1, 2, 3, 4, 5, 6]);

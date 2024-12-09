@@ -27,8 +27,10 @@
 import { ref, computed } from 'vue'
 import { useEventsStore } from '@/stores/events'
 
+const today = new Date().toISOString().split('T')[0];
+
 const messages = ref([
-    { role: 'system', content: 'Extract event details from the user\'s input and structure the response. The response should be in the following format: {"title": "string", "description": "string", "start": "YYYY-MM-DDTHH:mm:ss.sssZ", "end": "YYYY-MM-DDTHH:mm:ss.sssZ", "color": "string"}' },
+    { role: 'system', content: `Today's date is ${today}. Extract event details from the user's input and structure the response. The response should be in the following format: {"title": "string", "description": "string", "start": "YYYY-MM-DDTHH:mm:ss.sssZ", "end": "YYYY-MM-DDTHH:mm:ss.sssZ", "color": "string"}` },
     { role: 'assistant', content: 'Hello! I am your life assistant. I can help you schedule events. How can I help you today?' }
 ])
 
