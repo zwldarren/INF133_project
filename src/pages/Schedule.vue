@@ -7,6 +7,8 @@
             <span class="headline">Schedule</span>
           </v-card-title>
           <v-divider></v-divider>
+
+          <!-- Search Box for Events -->
           <v-card-text>
             <v-text-field v-model="searchQuery" label="Search Events/Description/Dates" variant="outlined" dense
               class="mb-4" />
@@ -21,6 +23,7 @@
               </template>
             </v-list>
           </v-card-text>
+
         </v-card>
       </v-col>
     </v-row>

@@ -45,8 +45,10 @@ const filteredMessages = computed(() =>
 const sendMessage = async () => {
     if (!userInput.value.trim()) return
 
+    // Add user input to messages
     messages.value.push({ role: 'user', content: userInput.value })
     const currentMessages = [...messages.value]
+    // Clear user input
     userInput.value = ''
 
     try {

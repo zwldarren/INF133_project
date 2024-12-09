@@ -1,3 +1,10 @@
+/**
+ * stores/events.js
+ * 
+ * Store for events; 
+ * It manages the state of the events and provides actions to add, update, and delete events.
+ */
+
 import { defineStore } from 'pinia';
 
 export const useEventsStore = defineStore('events', {

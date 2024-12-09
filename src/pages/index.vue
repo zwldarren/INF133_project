@@ -199,12 +199,15 @@ const resetNewEventForm = () => {
   isEditMode.value = false;
 };
 
+// Save event function used in the add/edit event dialog
 const saveEvent = () => {
+  // check if all fields are filled
   if (!newEvent.value.title || !newEvent.value.color || !newEvent.value.startDate || !newEvent.value.endDate) {
     alert('Please fill out all fields');
     return;
   }
 
+  // create start and end date objects
   const startDate = newEvent.value.startDate;
   const [startH, startM] = newEvent.value.startTime.split(':');
   startDate.setHours(parseInt(startH, 10));
@@ -215,6 +218,7 @@ const saveEvent = () => {
   endDate.setHours(parseInt(endH, 10));
   endDate.setMinutes(parseInt(endM, 10))
 
+  // check if end date is after start date
   if (startDate > endDate) {
     alert('End date must be after the start date');
     return;
@@ -238,6 +242,7 @@ const saveEvent = () => {
   resetNewEventForm();
 };
 
+// Edit event function used in the event dialog
 const editEvent = (event) => {
   isEditMode.value = true;
 
