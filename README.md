@@ -42,7 +42,7 @@ The backend requires certain environment variables to run. You should create a `
 cp backend/.env.template backend/.env
 ```
 
-Edit the newly created `.env` file with your specific configuration details.
+Note: You need to edit the `.env` file with your OpenAI API key. You should have the OpenAI API key for the backend to function.
 
 ### Start the Project
 
