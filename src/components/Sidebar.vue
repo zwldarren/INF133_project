@@ -22,6 +22,7 @@
                 value="home"></v-list-item>
             <v-list-item prepend-icon="mdi-calendar" title="Schedule" @click="navigateTo('schedule')"
                 value="schedule"></v-list-item>
+            <v-list-item prepend-icon="mdi-chat" title="Chat" @click="navigateTo('chat')" value="chat"></v-list-item>
             <v-list-item v-if="isLoggedIn" prepend-icon="mdi-account" title="My Account" @click="navigateTo('account')"
                 value="account"></v-list-item>
         </v-list>

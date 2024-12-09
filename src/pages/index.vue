@@ -99,6 +99,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useEventsStore } from '@/stores/events';
+import {v4 as uuidv4} from 'uuid';
 
 const type = ref('month');
 const types = ['month', 'week', 'day'];
@@ -233,14 +234,6 @@ const editEvent = (event) => {
 const deleteEvent = (eventToDelete) => {
   eventsStore.deleteEvent(eventToDelete);
   eventDialog.value = false;
-};
-
-const uuidv4 = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
 };
 
 // Load events when the component is mounted
