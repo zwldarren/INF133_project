@@ -1,106 +1,127 @@
 <template>
-  <v-sheet class="d-flex" height="54" tile>
-    <v-select v-model="type" :items="types" class="ma-2" label="View Mode" variant="outlined" dense
-      hide-details></v-select>
-    <v-select v-model="weekday" :items="weekdays" class="ma-2" label="Weekdays" variant="outlined" dense hide-details
-      item-title="title" item-value="value"></v-select>
-    <v-btn class="ma-2" @click="openAddEventDialog" color="primary">Add New Event</v-btn>
-  </v-sheet>
+  <v-container class="py-4">
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-select v-model="type" :items="types" class="ma-2" label="View Mode" variant="outlined" dense
+          hide-details></v-select>
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-select v-model="weekday" :items="weekdays" class="ma-2" label="Weekdays" variant="outlined" dense
+          hide-details item-title="title" item-value="value"></v-select>
+      </v-col>
+      <v-col cols="12" md="6" class="d-flex align-center justify-end">
+        <v-btn class="ma-2" @click="openAddEventDialog" color="primary">
+          Add New Event
+        </v-btn>
+      </v-col>
+    </v-row>
 
-  <v-sheet>
-    <v-calendar ref="calendar" v-model="value" :events="eventsStore.events" :view-mode="type" :weekdays="weekday">
-      <template #event="{ event }">
-        <v-sheet @click="openEventDialog(event)" :color="event.color" class="event-block white--text" elevation="1"
-          width="100%">
-          {{ event.title }}
-        </v-sheet>
-      </template>
-    </v-calendar>
-  </v-sheet>
+    <v-row>
+      <v-col cols="12">
+        <v-calendar ref="calendar" v-model="value" :events="eventsStore.events" :view-mode="type" :weekdays="weekday">
+          <template #event="{ event }">
+            <v-sheet @click="openEventDialog(event)" :color="event.color" class="event-block white--text" elevation="1"
+              width="100%">
+              {{ event.title }}
+            </v-sheet>
+          </template>
+        </v-calendar>
+      </v-col>
+    </v-row>
 
-  <!-- Event Details Dialog -->
-  <v-dialog v-model="eventDialog" max-width="500px">
-    <v-card>
-      <v-card-title>{{ selectedEvent.title }}</v-card-title>
-      <v-card-text>
-        <div><strong>Time:</strong> {{ formatDate(selectedEvent.start) }} - {{ formatDate(selectedEvent.end) }}</div>
-        <div v-if="selectedEvent.description"><strong>Description:</strong> {{ selectedEvent.description }}</div>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn color="red" text @click="deleteEvent(selectedEvent)">Delete</v-btn>
-        <v-btn color="blue darken-1" text @click="editEvent(selectedEvent)">Edit</v-btn>
-        <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" text @click="eventDialog = false">Close</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    <!-- Event Details Dialog -->
+    <v-dialog v-model="eventDialog" max-width="500px">
+      <v-card>
+        <v-card-title>{{ selectedEvent.title }}</v-card-title>
+        <v-card-text>
+          <div>
+            <strong>Time:</strong>
+            {{ formatDate(selectedEvent.start) }} -
+            {{ formatDate(selectedEvent.end) }}
+          </div>
+          <div v-if="selectedEvent.description">
+            <strong>Description:</strong>
+            {{ selectedEvent.description }}
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="red" text @click="deleteEvent(selectedEvent)">Delete</v-btn>
+          <v-btn color="blue darken-1" text @click="editEvent(selectedEvent)">Edit</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="eventDialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
-  <!-- Add/Edit Event Dialog -->
-  <v-dialog v-model="dialog" max-width="500px">
-    <v-card>
-      <v-card-title>{{ isEditMode ? 'Edit Event' : 'Add New Event' }}</v-card-title>
-      <v-card-text>
-        <v-container>
-          <v-row>
-            <v-col>
-              <v-text-field v-model="newEvent.title" label="Event Name"></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col>
-              <v-text-field v-model="newEvent.description" label="Description"></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col>
-              <v-date-input prepend-icon="" label="Start Date" v-model="newEvent.startDate"
-                type="datetime"></v-date-input>
-            </v-col>
-            <v-col>
-              <v-text-field v-model="newEvent.startTime" :active="startMenu" :focus="startMenu"
-                prepend-icon="mdi-clock-time-four-outline">
-                <v-menu v-model="startMenu" activator="parent" :close-on-content-click="false"
-                  transition="scale-transition">
-                  <v-time-picker v-model="newEvent.startTime" format="24hr" scrollable></v-time-picker>
-                </v-menu>
-              </v-text-field>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col>
-              <v-date-input prepend-icon="" label="End Date" v-model="newEvent.endDate" type="datetime"></v-date-input>
-            </v-col>
-            <v-col>
-              <v-text-field v-model="newEvent.endTime" :active="endMenu" :focus="endMenu"
-                prepend-icon="mdi-clock-time-four-outline">
-                <v-menu v-model="endMenu" activator="parent" :close-on-content-click="false"
-                  transition="scale-transition">
-                  <v-time-picker v-model="newEvent.endTime" format="24hr" scrollable></v-time-picker>
-                </v-menu>
-              </v-text-field>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col>
-              <v-select v-model="newEvent.color" :items="colors" label="Event Color"></v-select>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" text @click="cancelEvent">Cancel</v-btn>
-        <v-btn color="blue darken-1" text @click="saveEvent">Save</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    <!-- Add/Edit Event Dialog -->
+    <v-dialog v-model="dialog" max-width="500px">
+      <v-card>
+        <v-card-title>{{
+          isEditMode ? 'Edit Event' : 'Add New Event'
+          }}</v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field v-model="newEvent.title" label="Event Name"></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field v-model="newEvent.description" label="Description"></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-date-input label="Start Date" v-model="newEvent.startDate" type="datetime"></v-date-input>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field v-model="newEvent.startTime" :active="startMenu" :focus="startMenu"
+                  prepend-icon="mdi-clock-time-four-outline">
+                  <v-menu v-model="startMenu" activator="parent" :close-on-content-click="false"
+                    transition="scale-transition">
+                    <v-time-picker v-model="newEvent.startTime" format="24hr" scrollable></v-time-picker>
+                  </v-menu>
+                </v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-date-input label="End Date" v-model="newEvent.endDate" type="datetime"></v-date-input>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field v-model="newEvent.endTime" :active="endMenu" :focus="endMenu"
+                  prepend-icon="mdi-clock-time-four-outline">
+                  <v-menu v-model="endMenu" activator="parent" :close-on-content-click="false"
+                    transition="scale-transition">
+                    <v-time-picker v-model="newEvent.endTime" format="24hr" scrollable></v-time-picker>
+                  </v-menu>
+                </v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-select v-model="newEvent.color" :items="colors" label="Event Color"></v-select>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="cancelEvent">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="saveEvent">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-container>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useEventsStore } from '@/stores/events';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
+// Existing script setup remains unchanged
 const type = ref('month');
 const types = ['month', 'week', 'day'];
 const weekday = ref([0, 1, 2, 3, 4, 5, 6]);
