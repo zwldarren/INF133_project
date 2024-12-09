@@ -3,12 +3,8 @@
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [Tech Stack](#tech-stack)
 - [Installation and Running](#installation-and-running)
 - [Scripts](#scripts)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Introduction
 
